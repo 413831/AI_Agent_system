@@ -7,6 +7,7 @@ import (
 
 	"ai-agent-system/cache"
 	"ai-agent-system/service"
+	"ai-agent-system/graph/model"
 )
 
 type Resolver struct {
@@ -19,11 +20,11 @@ func hashPrompt(prompt string) string {
 	return fmt.Sprintf("%x", h)
 }
 
-func (r *Resolver) AskAI(ctx context.Context, prompt string) (*AIResponse, error) {
+func (r *Resolver) AskAI(ctx context.Context, prompt string) (*model.AIResponse, error) {
 	key := "ai:" + hashPrompt(prompt)
 
 	if val, err := r.Redis.Get(key); err == nil {
-		return &AIResponse{
+		return &model.AIResponse{
 			Prompt: prompt,
 			Result: val,
 			Cached: true,
@@ -37,9 +38,17 @@ func (r *Resolver) AskAI(ctx context.Context, prompt string) (*AIResponse, error
 
 	_ = r.Redis.Set(key, result)
 
-	return &AIResponse{
+	return &model.AIResponse{
 		Prompt: prompt,
 		Result: result,
 		Cached: false,
 	}, nil
+}
+
+type QueryResolver interface {
+	AskAI(ctx context.Context, prompt string) (*model.AIResponse, error)
+}
+
+type ResolverRoot interface {
+	Query() QueryResolver
 }
