@@ -1,10 +1,20 @@
-FROM golang:1.22-alpine
+version: "3.9"
 
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
+services:
+  api:
+    build: ./api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - ai-server
 
-COPY . .
-RUN go build -o server ./cmd/server
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
 
-CMD ["./server"]
+  ai-server:
+    build: ./ai-server
+    ports:
+      - "8000:8000"

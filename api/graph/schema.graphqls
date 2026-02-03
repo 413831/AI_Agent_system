@@ -1,0 +1,9 @@
+type Query {
+    askAI(prompt: String!): AIResponse!
+}
+
+type AIResponse {
+    prompt: String!
+    result: String!
+    cached: Boolean!
+}
